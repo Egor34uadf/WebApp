@@ -1,0 +1,64 @@
+@url = http://127.0.0.1:8000/api
+@username = testuser
+@email = test@test.ru
+@password = test123
+
+### 1. Регистрация пользователя
+POST {{url}}/users/
+Content-Type: application/json
+
+{
+    "username": "{{username}}",
+    "email": "{{email}}",
+    "password": "{{password}}"
+}
+
+### 2. Получение JWT токена
+# @name login
+POST {{url}}/token/
+Content-Type: application/json
+
+{
+    "username": "{{username}}",
+    "password": "{{password}}"
+}
+
+### 3. Сохраняем токен
+@authToken = {{login.response.body.access}}
+
+### 4. Создание поста
+# @name createPost
+POST {{url}}/posts/
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "title": "Мой первый пост",
+    "content": "Это содержимое моей первой статьи. Очень интересный текст!"
+}
+
+### 5. Получение всех постов
+GET {{url}}/posts/
+Authorization: Bearer {{authToken}}
+
+### 6. Получение одного поста
+@postId = {{createPost.response.body.id}}
+GET {{url}}/posts/{{postId}}/
+Authorization: Bearer {{authToken}}
+
+### 7. Обновление поста
+PATCH {{url}}/posts/{{postId}}/
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "title": "Мой первый пост (обновленный)"
+}
+
+### 8. Удаление поста
+DELETE {{url}}/posts/{{postId}}/
+Authorization: Bearer {{authToken}}
+
+### 9. Получение информации о пользователе
+GET {{url}}/users/1/
+Authorization: Bearer {{authToken}}

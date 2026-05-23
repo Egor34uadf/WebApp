@@ -5,10 +5,11 @@ from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
 )
-from backend.views import PostViewSet
+from backend.views import PostViewSet, UserViewSet
 
 router = routers.DefaultRouter()
-router.register(r'posts', PostViewSet, basename='post')   # ← добавлен basename
+router.register(r'posts', PostViewSet, basename='post')
+router.register(r'users', UserViewSet, basename='user')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
