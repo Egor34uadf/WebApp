@@ -2,7 +2,7 @@ from rest_framework import serializers
 from django.contrib.auth.models import User
 
 class UserSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True)  # пароль не возвращается в ответе
+    password = serializers.CharField(write_only=True)
 
     class Meta:
         model = User
@@ -15,4 +15,3 @@ class UserSerializer(serializers.ModelSerializer):
             password=validated_data['password']
         )
         return user
-        

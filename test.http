@@ -62,3 +62,11 @@ Authorization: Bearer {{authToken}}
 ### 9. Получение информации о пользователе
 GET {{url}}/users/1/
 Authorization: Bearer {{authToken}}
+POST http://127.0.0.1:8000/api/users/
+Content-Type: application/json
+
+{
+    "username": "testuser",
+    "email": "test@test.ru",
+    "password": "test123"
+}

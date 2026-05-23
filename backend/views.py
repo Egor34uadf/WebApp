@@ -12,20 +12,15 @@ class PostViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        # Авторизованный пользователь видит ВСЕ статьи (для админа/модерации)
-        # Но можно оставить только свои - раскомментируй строку ниже
-        # return Post.objects.filter(author=self.request.user)
         return Post.objects.all()
 
     def perform_create(self, serializer):
-        # Автор автоматически берется из запроса
         serializer.save(author=self.request.user)
 
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
         
-        # Проверяем, что автор статьи - текущий пользователь
         if instance.author != request.user:
             return Response(
                 {'error': 'Вы не можете редактировать чужую статью'},
@@ -40,7 +35,6 @@ class PostViewSet(viewsets.ModelViewSet):
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
         
-        # Проверяем, что автор статьи - текущий пользователь
         if instance.author != request.user:
             return Response(
                 {'error': 'Вы не можете удалить чужую статью'},
@@ -54,28 +48,14 @@ class PostViewSet(viewsets.ModelViewSet):
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [AllowAny]  # Регистрация доступна всем
+    permission_classes = [AllowAny]
 
     def get_permissions(self):
-        # Для удаления/обновления нужна авторизация
-        if self.action in ['update', 'partial_update', 'destroy']:
+        if self.action in ['update', 'partial_update', 'destroy', 'me']:
             self.permission_classes = [IsAuthenticated]
         return super().get_permissions()
 
-    def update(self, request, *args, **kwargs):
-        user = self.get_object()
-        if user != request.user:
-            return Response(
-                {'error': 'Вы можете редактировать только свой профиль'},
-                status=status.HTTP_403_FORBIDDEN
-            )
-        return super().update(request, *args, **kwargs)
-
-    def destroy(self, request, *args, **kwargs):
-        user = self.get_object()
-        if user != request.user:
-            return Response(
-                {'error': 'Вы можете удалить только свой профиль'},
-                status=status.HTTP_403_FORBIDDEN
-            )
-        return super().destroy(request, *args, **kwargs)
+    @action(detail=False, methods=['get'], url_path='me')
+    def me(self, request):
+        serializer = self.get_serializer(request.user)
+        return Response(serializer.data)
