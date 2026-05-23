@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-const AuthPage = () => {
+const AuthPage = ({ onLogin }) => {  // ← добавляем onLogin
     const [isLogin, setIsLogin] = useState(true);
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
@@ -15,7 +15,6 @@ const AuthPage = () => {
 
         try {
             if (isLogin) {
-                // ============ ВХОД ============
                 const response = await fetch('http://127.0.0.1:8000/api/token/', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -28,14 +27,9 @@ const AuthPage = () => {
                     throw new Error(data.detail || 'Неверное имя пользователя или пароль');
                 }
 
-                // Сохраняем токен
                 localStorage.setItem('accessToken', data.access);
-                console.log('Токен сохранен, редирект...');
-                
-                // Редирект на профиль
-                window.location.href = '/profile';
+                onLogin();  // ← вызываем onLogin
             } else {
-                // ============ РЕГИСТРАЦИЯ ============
                 const response = await fetch('http://127.0.0.1:8000/api/users/', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -59,7 +53,6 @@ const AuthPage = () => {
                 setEmail('');
             }
         } catch (err) {
-            console.error('Ошибка:', err);
             setError(err.message);
         } finally {
             setLoading(false);

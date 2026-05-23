@@ -1,64 +1,71 @@
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import api from '../api';
+import { useState, useEffect } from 'react';
 
 const ProfilePage = () => {
     const [user, setUser] = useState(null);
-    const navigate = useNavigate();
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchUser = async () => {
             try {
-                const res = await api.get('users/me/');
-                setUser(res.data);
+                const token = localStorage.getItem('accessToken');
+                const response = await fetch('http://127.0.0.1:8000/api/users/me/', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (!response.ok) throw new Error('Ошибка загрузки профиля');
+                
+                const data = await response.json();
+                setUser(data);
             } catch (err) {
-                console.error('Доступ запрещен', err);
-                navigate('/login');
+                console.error(err);
+            } finally {
+                setLoading(false);
             }
         };
+        
         fetchUser();
-    }, [navigate]);
+    }, []);
 
-    const handleLogout = () => {
-        localStorage.removeItem('accessToken');
-        navigate('/login');
-    };
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+                <div className="text-xl">Загрузка...</div>
+            </div>
+        );
+    }
 
     if (!user) {
         return (
-            <div className="min-h-screen bg-gray-900 flex items-center justify-center text-white">
-                Загрузка...
+            <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+                <div className="text-xl text-red-600">Ошибка загрузки профиля</div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8">
-                <h1 className="text-3xl font-bold text-center text-gray-800 mb-8">
-                    Личный кабинет
-                </h1>
-
-                <div className="space-y-4">
-                    <div className="border-b pb-3">
-                        <p className="text-gray-500 text-sm">Имя пользователя</p>
-                        <p className="text-gray-800 font-medium">{user.username}</p>
-                    </div>
-                    <div className="border-b pb-3">
-                        <p className="text-gray-500 text-sm">Email</p>
-                        <p className="text-gray-800 font-medium">{user.email || 'Не указан'}</p>
+        <div className="min-h-screen bg-gray-100 py-8">
+            <div className="container mx-auto px-4 max-w-md">
+                <div className="bg-white rounded-lg shadow-md p-8">
+                    <h1 className="text-3xl font-bold text-center text-gray-800 mb-8">
+                        Личный кабинет
+                    </h1>
+                    
+                    <div className="space-y-4">
+                        <div className="border-b pb-3">
+                            <p className="text-gray-500 text-sm">Имя пользователя</p>
+                            <p className="text-gray-800 font-medium">{user.username}</p>
+                        </div>
+                        <div className="border-b pb-3">
+                            <p className="text-gray-500 text-sm">Email</p>
+                            <p className="text-gray-800 font-medium">{user.email || 'Не указан'}</p>
+                        </div>
                     </div>
                 </div>
-
-                <button
-                    onClick={handleLogout}
-                    className="w-full mt-8 bg-red-600 hover:bg-red-700 text-white font-semibold py-2 rounded-lg transition duration-200"
-                >
-                    Выйти
-                </button>
             </div>
         </div>
     );
 };
 
-export default ProfilePage;  
+export default ProfilePage;
