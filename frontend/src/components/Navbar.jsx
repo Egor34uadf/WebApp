@@ -13,22 +13,16 @@ const Navbar = ({ onLogout }) => {
             <div className="container mx-auto px-4">
                 <div className="flex justify-between items-center h-16">
                     <div className="flex space-x-6">
-                        <Link 
-                            to="/" 
-                            className="text-gray-700 hover:text-blue-600 font-medium transition"
-                        >
+                        <Link to="/" className="text-gray-700 hover:text-blue-600 font-medium transition">
                             Главная
                         </Link>
-                        <Link 
-                            to="/create" 
-                            className="text-gray-700 hover:text-blue-600 font-medium transition"
-                        >
+                        <Link to="/create" className="text-gray-700 hover:text-blue-600 font-medium transition">
                             Новая статья
                         </Link>
-                        <Link 
-                            to="/profile" 
-                            className="text-gray-700 hover:text-blue-600 font-medium transition"
-                        >
+                        <Link to="/favorites" className="text-gray-700 hover:text-blue-600 font-medium transition">
+                            Избранное ⭐
+                        </Link>
+                        <Link to="/profile" className="text-gray-700 hover:text-blue-600 font-medium transition">
                             Профиль
                         </Link>
                     </div>

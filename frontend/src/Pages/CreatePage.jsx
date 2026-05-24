@@ -1,37 +1,62 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import api from '../api';
 
 const CreatePage = () => {
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
+    const [image, setImage] = useState(null);
+    const [useDefaultImage, setUseDefaultImage] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const navigate = useNavigate();
+
+    // Обработчик выбора файла
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setImage(file);
+            // Если выбрали свой файл — отключаем чекбокс "по умолчанию"
+            setUseDefaultImage(false);
+        }
+    };
+
+    // Обработчик чекбокса
+    const handleDefaultImageChange = (e) => {
+        const isChecked = e.target.checked;
+        setUseDefaultImage(isChecked);
+        if (isChecked) {
+            // Если включили "по умолчанию" — убираем свой файл
+            setImage(null);
+            // Очищаем поле выбора файла
+            const fileInput = document.getElementById('imageInput');
+            if (fileInput) fileInput.value = '';
+        }
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
         setError('');
 
+        const formData = new FormData();
+        formData.append('title', title);
+        formData.append('content', content);
+        
+        // Если выбрано "по умолчанию" — не отправляем изображение
+        if (!useDefaultImage && image) {
+            formData.append('image', image);
+        }
+        // Если useDefaultImage === true — поле image не добавляем (будет null в БД, и на фронте покажется дефолтная картинка)
+
         try {
-            const token = localStorage.getItem('accessToken');
-            const response = await fetch('http://127.0.0.1:8000/api/posts/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ title, content }),
+            await api.post('posts/', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
             });
-
-            if (!response.ok) {
-                const data = await response.json();
-                throw new Error(data.detail || 'Ошибка создания статьи');
-            }
-
             navigate('/');
         } catch (err) {
-            setError(err.message);
+            setError('Ошибка создания статьи');
+            console.error(err);
         } finally {
             setLoading(false);
         }
@@ -61,7 +86,6 @@ const CreatePage = () => {
                                 value={title}
                                 onChange={(e) => setTitle(e.target.value)}
                                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                placeholder="Введите заголовок"
                                 required
                                 disabled={loading}
                             />
@@ -74,12 +98,51 @@ const CreatePage = () => {
                             <textarea
                                 value={content}
                                 onChange={(e) => setContent(e.target.value)}
-                                rows="10"
+                                rows="8"
                                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                placeholder="Введите текст статьи..."
                                 required
                                 disabled={loading}
                             />
+                        </div>
+
+                        {/* Чекбокс "Фото по умолчанию" */}
+                        <div className="flex items-center space-x-3">
+                            <input
+                                type="checkbox"
+                                id="useDefaultImage"
+                                checked={useDefaultImage}
+                                onChange={handleDefaultImageChange}
+                                disabled={loading || image !== null}
+                                className="w-5 h-5 text-blue-600"
+                            />
+                            <label htmlFor="useDefaultImage" className="text-gray-700 font-medium">
+                                Использовать фото по умолчанию
+                            </label>
+                        </div>
+
+                        {/* Поле загрузки файла */}
+                        <div>
+                            <label className="block text-gray-700 font-medium mb-2">
+                                Или загрузите своё изображение
+                            </label>
+                            <input
+                                id="imageInput"
+                                type="file"
+                                accept="image/*"
+                                onChange={handleImageChange}
+                                disabled={loading || useDefaultImage}
+                                className="w-full"
+                            />
+                            {image && (
+                                <p className="text-sm text-green-600 mt-1">
+                                    ✓ Выбран файл: {image.name}
+                                </p>
+                            )}
+                            {useDefaultImage && (
+                                <p className="text-sm text-gray-500 mt-1">
+                                    🔘 Будет использовано фото по умолчанию
+                                </p>
+                            )}
                         </div>
 
                         <div className="flex space-x-4">
@@ -88,7 +151,7 @@ const CreatePage = () => {
                                 disabled={loading}
                                 className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg transition disabled:opacity-50"
                             >
-                                {loading ? 'Сохранение...' : 'Опубликовать'}
+                                {loading ? 'Публикация...' : 'Опубликовать'}
                             </button>
                             <button
                                 type="button"

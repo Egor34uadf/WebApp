@@ -22,6 +22,15 @@ const PostModal = ({ post, onClose }) => {
                     </button>
                 </div>
                 <div className="p-6">
+                    {/* ✅ Исправленный блок картинки */}
+                    <img 
+                        src={post.image || 'http://127.0.0.1:8000/media/default.jpg'}
+                        alt={post.title}
+                        className="w-full rounded-lg mb-4 object-cover max-h-96"
+                        onError={(e) => {
+                            e.target.src = 'http://127.0.0.1:8000/media/default.jpg';
+                        }}
+                    />
                     <div className="text-sm text-gray-500 mb-4">
                         Автор: {post.author || 'Неизвестен'} | {new Date(post.created_date).toLocaleDateString('ru-RU')}
                     </div>

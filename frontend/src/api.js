@@ -1,15 +1,10 @@
-// api.js
 import axios from 'axios';
 
 const api = axios.create({
     baseURL: 'http://127.0.0.1:8000/api/',
 });
 
-// Отдельный экземпляр для запросов без токена
-export const publicApi = axios.create({
-    baseURL: 'http://127.0.0.1:8000/api/',
-});
-
+// Добавляем токен в заголовки
 api.interceptors.request.use((config) => {
     const token = localStorage.getItem('accessToken');
     if (token) {

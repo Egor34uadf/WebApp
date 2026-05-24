@@ -4,6 +4,7 @@ import AuthPage from './pages/AuthPage';
 import ProfilePage from './pages/ProfilePage';
 import HomePage from './pages/HomePage';
 import CreatePage from './pages/CreatePage';
+import FavoritesPage from './pages/FavoritesPage';
 import Navbar from './components/Navbar';
 
 function App() {
@@ -52,6 +53,10 @@ function App() {
                 <Route 
                     path="/create" 
                     element={isAuthenticated ? <CreatePage /> : <Navigate to="/login" />} 
+                />
+                <Route 
+                    path="/favorites" 
+                    element={isAuthenticated ? <FavoritesPage /> : <Navigate to="/login" />} 
                 />
                 <Route path="*" element={<Navigate to="/" />} />
             </Routes>
